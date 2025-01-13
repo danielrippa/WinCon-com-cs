@@ -10,39 +10,43 @@ namespace WinCon {
 
   public class ScreenBuffer {
 
-    private IntPtr _handle;
-    private Cursor _cursor;
-    private TextAttributes _textAttributes;
-    
+    private IntPtr handle = Kernel32.GetStdOutHandle();
+
+    private Cursor cursor = new Cursor();
+    private TextAttributes textAttributes = new TextAttributes();
+
     public IntPtr Handle {
-      get => _handle;
+      get => handle;
       set {
-        _handle = value;
-        _cursor.Handle = value;
-        _textAttributes.Handle = value;
+        handle = value;
+
+        cursor.Handle = value;
+        textAttributes.Handle = value;
       }
     }
 
-    public ScreenBuffer() {
-      _cursor = new Cursor();
-      _textAttributes = new TextAttributes();
-      Handle = Kernel32.GetStdOutHandle();
-    }
-
     public Cursor Cursor {
-      get => _cursor;
+      get => cursor;
     }
 
     public TextAttributes TextAttributes {
-      get => _textAttributes;
+      get => textAttributes;
     }
-    
+
+    //
+
     public void Write(string lpBuffer) {
       Kernel32.WriteConsole(Handle, lpBuffer, (uint)lpBuffer.Length, out _, IntPtr.Zero);
     }
 
+    //
+
+    public static IntPtr CreateHandle() {
+      return Kernel32.CreateScreenBufferHandle();
+    }
+
     public void AssignHandle() {
-      Handle = Kernel32.CreateScreenBufferHandle();
+      Handle = CreateHandle();
     }
 
     public void Close() {
@@ -53,5 +57,36 @@ namespace WinCon {
       Kernel32.SetConsoleActiveScreenBuffer(Handle);
     }
 
+    // Modes
+
+    public bool ProcessedOutput {
+      get => GetModeBit(Kernel32.ENABLE_PROCESSED_OUTPUT);
+      set => SetModeBit(Kernel32.ENABLE_PROCESSED_OUTPUT, value);
+    }
+
+    public bool WrapAtEOL {
+      get => GetModeBit(Kernel32.ENABLE_WRAP_AT_EOL_OUTPUT);
+      set => SetModeBit(Kernel32.ENABLE_WRAP_AT_EOL_OUTPUT, value);
+    }
+
+    public bool TerminalMode {
+      get => GetModeBit(Kernel32.ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+      set => SetModeBit(Kernel32.ENABLE_VIRTUAL_TERMINAL_PROCESSING, value);
+    }
+
+    public bool BordersMode {
+      get => GetModeBit(Kernel32.ENABLE_LVB_GRID_WORLDWIDE);
+      set => SetModeBit(Kernel32.ENABLE_LVB_GRID_WORLDWIDE, value);
+    }
+
+    private bool GetModeBit(uint bit) {
+      return Kernel32.GetConsoleModeBit(Handle, bit);
+    }
+
+    private void SetModeBit(uint bit, bool value) {
+      Kernel32.SetConsoleModeBit(Handle, bit, value);
+    }
+
   }
+
 }

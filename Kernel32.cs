@@ -24,6 +24,20 @@ namespace WinCon {
     }
 
     [DllImport(Dll)]
+    private static extern IntPtr CreateConsoleScreenBuffer(
+      uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwFlags, IntPtr lpScreenBufferData
+    );
+
+    private const uint GENERIC_READ =  0x80000000;
+    private const uint GENERIC_WRITE = 0x40000000;
+
+    private const uint CONSOLE_TEXTMODE_BUFFER = 1;
+
+    internal static IntPtr CreateScreenBufferHandle() {
+      return CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, IntPtr.Zero, CONSOLE_TEXTMODE_BUFFER, IntPtr.Zero);
+    }
+
+    [DllImport(Dll)]
     internal static extern bool CloseHandle(IntPtr handle);
 
     //
@@ -65,6 +79,14 @@ namespace WinCon {
     [DllImport(Dll)]
     internal static extern bool SetConsoleTextAttribute(IntPtr hConsoleOutput, short wAttributes);
 
+    [DllImport(Dll)]
+    internal static extern bool SetConsoleActiveScreenBuffer(IntPtr hConsoleOutput);
+
+    [DllImport(Dll)]
+    internal static extern bool WriteConsole(
+      IntPtr hConsoleOutput, string lpBuffer, uint nNumberOfCharsToWrite, out uint lpNumberOfCharsWritten, IntPtr lpReserved
+    );
+
     // Cursor
 
     [DllImport(Dll)]
@@ -86,6 +108,31 @@ namespace WinCon {
       GetConsoleCursorInfo(hConsoleOutput, out CONSOLE_CURSOR_INFO cursorInfo);
       return cursorInfo;
     }
+
+    // Mode
+
+    [DllImport(Dll)]
+    private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport(Dll)]
+    private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+    internal static bool GetConsoleModeBit(IntPtr handle, uint bit) {
+      GetConsoleMode(handle, out uint mode);
+      return (mode & bit) != 0;
+    }
+
+    internal static void SetConsoleModeBit(IntPtr handle, uint bit, bool value) {
+      GetConsoleMode(handle, out uint mode);
+      mode = value ? (mode | bit): (mode & ~bit);
+      SetConsoleMode(handle, mode);
+    }
+
+    internal static uint ENABLE_PROCESSED_OUTPUT = 0x0001;
+    internal static uint ENABLE_WRAP_AT_EOL_OUTPUT = 0x0002;
+    internal static uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
+    internal static uint DISABLE_NEWLINE_AUTO_RETURN = 0x0008;
+    internal static uint ENABLE_LVB_GRID_WORLDWIDE = 0x0010;
 
   }
 
