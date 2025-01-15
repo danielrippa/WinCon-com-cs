@@ -34,10 +34,6 @@ namespace WinCon {
           eventDetails = GetMouseEvent(inputRecord);
           break;
 
-        default:
-          Console.WriteLine($"Otro event que nada que ver {inputRecord.EventType}");
-          break;
-
       }
 
       return JsonConvert.SerializeObject(eventDetails);
