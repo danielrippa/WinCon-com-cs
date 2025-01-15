@@ -170,6 +170,9 @@ namespace WinCon {
     internal const uint ENABLE_QUICK_EDIT_MODE = 0x0040;
     internal const uint ENABLE_WINDOW_INPUT = 0x0008;
 
+    internal const uint ENABLE_EXTENDED_FLAGS = 0x0080;
+    // https://stackoverflow.com/questions/76156132/non-documented-console-input-mode-flags
+
     [DllImport(Dll)]
     internal static extern bool GetNumberOfConsoleInputEvents(IntPtr hConsoleInput, ref uint lpcNumberOfEvents);
 

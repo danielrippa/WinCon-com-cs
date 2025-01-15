@@ -34,6 +34,10 @@ namespace WinCon {
           eventDetails = GetMouseEvent(inputRecord);
           break;
 
+        default:
+          Console.WriteLine($"Otro event que nada que ver {inputRecord.EventType}");
+          break;
+
       }
 
       return JsonConvert.SerializeObject(eventDetails);
@@ -42,45 +46,61 @@ namespace WinCon {
     // modes
 
     public bool EchoInput {
-      get { return GetConsoleMode(Kernel32.ENABLE_ECHO_INPUT); }
-      set { SetConsoleMode(Kernel32.ENABLE_ECHO_INPUT, value); }
+      get => GetModeBit(Kernel32.ENABLE_ECHO_INPUT);
+      set => SetModeBit(Kernel32.ENABLE_ECHO_INPUT, value);
     }
 
-    public bool QuickEditMode {
-      get { return GetConsoleMode(Kernel32.ENABLE_QUICK_EDIT_MODE); }
-      set { SetConsoleMode(Kernel32.ENABLE_QUICK_EDIT_MODE, value); }
+    public bool QuickEdit {
+      get => GetModeBit(Kernel32.ENABLE_QUICK_EDIT_MODE);
+      set {
+        var mode = Kernel32.ENABLE_EXTENDED_FLAGS;
+        // https://stackoverflow.com/questions/76156132/non-documented-console-input-mode-flags
+
+        if (value) {
+          mode = Kernel32.ENABLE_QUICK_EDIT_MODE | mode;
+        }
+        SetModeBit(mode, value);
+      }
     }
 
     public bool ProcessedInput {
-      get { return GetConsoleMode(Kernel32.ENABLE_PROCESSED_INPUT); }
-      set { SetConsoleMode(Kernel32.ENABLE_PROCESSED_INPUT, value); }
+      get => GetModeBit(Kernel32.ENABLE_PROCESSED_INPUT);
+      set => SetModeBit(Kernel32.ENABLE_PROCESSED_INPUT, value);
     }
 
-    public bool InsertMode {
-      get { return GetConsoleMode(Kernel32.ENABLE_INSERT_MODE); }
-      set { SetConsoleMode(Kernel32.ENABLE_INSERT_MODE, value); }
+    public bool Insert {
+      get => GetModeBit(Kernel32.ENABLE_INSERT_MODE);
+      set {
+        var mode = Kernel32.ENABLE_EXTENDED_FLAGS;
+        // https://stackoverflow.com/questions/76156132/non-documented-console-input-mode-flags
+
+        if (value) {
+          mode = Kernel32.ENABLE_INSERT_MODE | mode;
+        };
+        SetModeBit(mode, value);
+      }
     }
 
     public bool LineInput {
-      get { return GetConsoleMode(Kernel32.ENABLE_LINE_INPUT); }
-      set { SetConsoleMode(Kernel32.ENABLE_LINE_INPUT, value); }
+      get => GetModeBit(Kernel32.ENABLE_LINE_INPUT);
+      set => SetModeBit(Kernel32.ENABLE_LINE_INPUT, value);
     }
 
     public bool MouseInput {
-      get { return GetConsoleMode(Kernel32.ENABLE_MOUSE_INPUT); }
-      set { SetConsoleMode(Kernel32.ENABLE_MOUSE_INPUT, value); }
+      get => GetModeBit(Kernel32.ENABLE_MOUSE_INPUT);
+      set => SetModeBit(Kernel32.ENABLE_MOUSE_INPUT, value);
     }
 
     public bool WindowInput {
-      get { return GetConsoleMode(Kernel32.ENABLE_WINDOW_INPUT); }
-      set { SetConsoleMode(Kernel32.ENABLE_WINDOW_INPUT, value); }
+      get => GetModeBit(Kernel32.ENABLE_WINDOW_INPUT);
+      set => SetModeBit(Kernel32.ENABLE_WINDOW_INPUT, value);
     }
 
-    private bool GetConsoleMode(uint bit) {
+    private bool GetModeBit(uint bit) {
       return Kernel32.GetConsoleModeBit(handle, bit);
     }
 
-    private void SetConsoleMode(uint bit, bool value) {
+    private void SetModeBit(uint bit, bool value) {
       Kernel32.SetConsoleModeBit(handle, bit, value);
     }
 
